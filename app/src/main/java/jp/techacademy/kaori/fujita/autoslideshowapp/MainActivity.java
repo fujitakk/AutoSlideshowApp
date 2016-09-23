@@ -22,7 +22,6 @@ import java.util.TimerTask;
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener {
 	private static final int PERMISSIONS_REQUEST_CODE = 100;
-	private boolean perm;
 
 	private ArrayList<Uri> AryUri;
 	private int Position = 0;
@@ -39,15 +38,14 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 			// パーミッションの許可状態を確認する
 			if (checkSelfPermission(Manifest.permission.READ_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED) {
 				// 許可されている
-				perm = true;
+				getContentsInfo();
 			} else {
 				// 許可されていないので許可ダイアログを表示する
 				requestPermissions(new String[]{Manifest.permission.READ_EXTERNAL_STORAGE}, PERMISSIONS_REQUEST_CODE);
-				perm = false;
 			}
 			// Android 5系以下の場合
 		} else {
-			perm = true;
+			getContentsInfo();
 		}
 
 		Button button_back = (Button) findViewById(R.id.button_back);
@@ -60,42 +58,41 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 		Button button_next = (Button) findViewById(R.id.button_next);
 		button_next.setOnClickListener(this);
 
+	}
 
-		if ( perm == true ) {
-			// 画像の情報を取得する
-			ContentResolver resolver = getContentResolver();
-			Cursor cursor = resolver.query(
-					MediaStore.Images.Media.EXTERNAL_CONTENT_URI, // データの種類
-					null, // 項目(null = 全項目)
-					null, // フィルタ条件(null = フィルタなし)
-					null, // フィルタ用パラメータ
-					null // ソート (null ソートなし)
-			);
+	private void getContentsInfo() {
+		// 画像の情報を取得する
+		ContentResolver resolver = getContentResolver();
+		Cursor cursor = resolver.query(
+				MediaStore.Images.Media.EXTERNAL_CONTENT_URI, // データの種類
+				null, // 項目(null = 全項目)
+				null, // フィルタ条件(null = フィルタなし)
+				null, // フィルタ用パラメータ
+				null // ソート (null ソートなし)
+		);
 
-			//IDを格納する配列をnew
-			AryUri = new ArrayList<>();
+		//IDを格納する配列をnew
+		AryUri = new ArrayList<>();
 
-			if (cursor.moveToFirst()) {
-				do {
-					// indexからIDを取得し、そのIDから画像のURIを取得する
-					int fieldIndex = cursor.getColumnIndex(MediaStore.Images.Media._ID);
-					Long id = cursor.getLong(fieldIndex);
-					Uri imageUri = ContentUris.withAppendedId(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, id);
+		if (cursor.moveToFirst()) {
+			do {
+				// indexからIDを取得し、そのIDから画像のURIを取得する
+				int fieldIndex = cursor.getColumnIndex(MediaStore.Images.Media._ID);
+				Long id = cursor.getLong(fieldIndex);
+				Uri imageUri = ContentUris.withAppendedId(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, id);
 
-					//IDを配列に入れる
-					AryUri.add(imageUri);
-				} while (cursor.moveToNext());
-			}
-			cursor.close();
-
-			//画像を表示
-			ImageView imageVIew = (ImageView) findViewById(R.id.imageView);
-			imageVIew.setImageURI(AryUri.get(Position));
-
-			//再生/停止用
-			handler = new Handler();
+				//IDを配列に入れる
+				AryUri.add(imageUri);
+			} while (cursor.moveToNext());
 		}
+		cursor.close();
 
+		//画像を表示
+		ImageView imageVIew = (ImageView) findViewById(R.id.imageView);
+		imageVIew.setImageURI(AryUri.get(Position));
+
+		//再生/停止用
+		handler = new Handler();
 	}
 
 	@Override
@@ -103,7 +100,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 		switch (requestCode) {
 			case PERMISSIONS_REQUEST_CODE:
 				if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-					perm = true;
+					getContentsInfo();
+				} else {
+					this.finish();
 				}
 				break;
 			default:
