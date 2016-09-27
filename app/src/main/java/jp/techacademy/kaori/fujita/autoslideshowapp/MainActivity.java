@@ -11,6 +11,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.provider.MediaStore;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
@@ -71,6 +72,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 				null // ソート (null ソートなし)
 		);
 
+		Log.d("■■■Android", "1　getContentsInfo()");
 		//IDを格納する配列をnew
 		AryUri = new ArrayList<>();
 
@@ -87,12 +89,14 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 		}
 		cursor.close();
 
-		//画像を表示
-		ImageView imageVIew = (ImageView) findViewById(R.id.imageView);
-		imageVIew.setImageURI(AryUri.get(Position));
+		if(AryUri.size() > 0) {
+			//画像を表示
+			ImageView imageVIew = (ImageView) findViewById(R.id.imageView);
+			imageVIew.setImageURI(AryUri.get(Position));
+		}
 
-		//再生/停止用
-		handler = new Handler();
+			//再生/停止用
+			handler = new Handler();
 	}
 
 	@Override
@@ -112,30 +116,34 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
 	//進む
 	private void moveToNext() {
-		if(Position < AryUri.size()-1) {
-			Position++;
-		} else {
-			Position = 0;
-		}
+		if(AryUri.size() > 0) {
+			if (Position < AryUri.size() - 1) {
+				Position++;
+			} else {
+				Position = 0;
+			}
 
-		ImageView imageVIew = (ImageView) findViewById(R.id.imageView);
-		imageVIew.setImageURI(AryUri.get(Position));
+			ImageView imageVIew = (ImageView) findViewById(R.id.imageView);
+			imageVIew.setImageURI(AryUri.get(Position));
 
 //		Log.d("■■■Android", "進むPosition = " + Position);
+		}
 	}
 
 	//戻る
 	private void moveToPrevious() {
-		if(Position == 0) {
-			Position = AryUri.size()-1;
-		} else {
-			Position--;
-		}
+		if(AryUri.size() > 0) {
+			if (Position == 0) {
+				Position = AryUri.size() - 1;
+			} else {
+				Position--;
+			}
 
-		ImageView imageVIew = (ImageView) findViewById(R.id.imageView);
-		imageVIew.setImageURI(AryUri.get(Position));
+			ImageView imageVIew = (ImageView) findViewById(R.id.imageView);
+			imageVIew.setImageURI(AryUri.get(Position));
 
 //		Log.d("■■■Android", "戻るPosition = " + Position);
+		}
 	}
 
 
